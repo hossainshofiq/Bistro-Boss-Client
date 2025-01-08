@@ -1,17 +1,56 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
+import useAuthHook from '../../Hooks/useAuthHook';
+import Swal from 'sweetalert2';
+import { Tooltip } from 'react-tooltip';
+import { FaShoppingCart } from 'react-icons/fa';
+import useCart from '../../Hooks/useCart';
 
 const Navbar = () => {
+
+    const { user, logout } = useAuthHook();
+    const [cart] = useCart();
+
+    const handleLogout = () => {
+        logout()
+            .then(() => {
+                Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "User Logout Successfully",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+    }
 
     const links = <>
         <div className='lg:flex gap-2'>
             <li className='uppercase'><NavLink to={'/'}>Home</NavLink></li>
-            {/* <li className='uppercase'><NavLink to={'/'}>Contact Us</NavLink></li>
-            <li className='uppercase'><NavLink to={'/'}>Dashboard</NavLink></li> */}
+            {/* <li className='uppercase'><NavLink to={'/'}>Contact Us</NavLink></li> */}
+            <li className='uppercase'><NavLink to={'/dashboard'}>Dashboard</NavLink></li>
             <li className='uppercase'><NavLink to={'/menu'}>Our Menu</NavLink></li>
             <li className='uppercase'><NavLink to={'/order/salad'}>Our Shop</NavLink></li>
-            <li className='uppercase'><NavLink to={'/login'}>Login</NavLink></li>
-            <li className='uppercase'><NavLink to={'/register'}>Register</NavLink></li>
+            {/* <li className='uppercase'><NavLink to={'/register'}>Register</NavLink></li> */}
+            <li className='uppercase'><NavLink to={'/secret'}>Secret</NavLink></li>
+            <li>
+                <Link to={'/dashboard/cart'}>
+                    <button className="btn">
+                        <FaShoppingCart className='text-lg'></FaShoppingCart>
+                        <div className="badge badge-secondary">+{cart.length}</div>
+                    </button>
+                </Link>
+            </li>
+            {/* {
+                user ?
+                    <><button onClick={handleLogout} className='btn btn-error uppercase'>Logout</button></>
+                    :
+                    <><li className='uppercase'><Link to={'/login'}>Login</Link></li></>
+            } */}
         </div>
     </>
     return (
@@ -46,7 +85,30 @@ const Navbar = () => {
                 </ul>
             </div>
             <div className="navbar-end">
-                <a className="btn">Button</a>
+                {
+                    user ?
+                        <>
+                            <div className='flex items-center gap-2'>
+                                <div className='border-2 p-1 border-black rounded-md'><h2>{user?.displayName}</h2></div>
+                                <div>
+                                    <img
+                                        className='w-12 h-12 object-cover rounded-full border-2 border-black'
+                                        src={user?.photoURL}
+                                        alt={user?.displayName}
+                                        data-tooltip-id='my-tooltip'
+                                        data-tooltip-content={user?.displayName}
+                                    />
+                                    <Tooltip id='my-tooltip'></Tooltip>
+                                </div>
+                                <button onClick={handleLogout} className='btn btn-error uppercase'>Logout</button>
+                            </div>
+                        </>
+                        :
+                        <>
+                            <Link to={"/register"} className='btn btn-link text-white uppercase'><button>Register</button></Link>
+                            <Link to={"/login"}><button className='btn btn-success uppercase'>Login</button></Link>
+                        </>
+                }
             </div>
         </div>
     );
